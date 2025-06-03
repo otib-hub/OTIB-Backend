@@ -3,88 +3,46 @@ from rest_framework import generics, permissions, viewsets
 from .models import *
 from .serializers import * 
 
-class TuristaListCreateView(generics.ListCreateAPIView):
+class TuristaViewSet(viewsets.ModelViewSet):
     queryset = Turista.objects.all()
     serializer_class = TuristaSerializer
 
     permission_classes = [permissions.AllowAny]
 
-class TuristaUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Turista.objects.all()
-    serializer_class = TuristaSerializer
-
-    permission_classes = [permissions.AllowAny]
-
-class ViagemListCreateView(generics.ListCreateAPIView):
+class ViagemViewSet(viewsets.ModelViewSet):
     queryset = Viagem.objects.all()
     serializer_class = ViagemSerializer
 
     permission_classes = [permissions.AllowAny]
 
-class ViagemUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Viagem.objects.all()
-    serializer_class = ViagemSerializer
-
-    permission_classes = [permissions.AllowAny]
-
-class PercepcaoListCreateView(generics.ListCreateAPIView):
+class PercepcaoViewSet(viewsets.ModelViewSet):
     queryset = Percepcao.objects.all()
     serializer_class = PercepcaoSerializer
 
     permission_classes = [permissions.AllowAny]
 
-class PercepcaoUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Percepcao.objects.all()
-    serializer_class = PercepcaoSerializer
-
-    permission_classes = [permissions.AllowAny]
-
-class AtividadesRealizadasListCreateView(generics.ListCreateAPIView):
+class AtividadesRealizadasViewSet(viewsets.ModelViewSet):
     queryset = AtividadesRealizadas.objects.all()
     serializer_class = AtividadesRealizadasSerializer
 
     permission_classes = [permissions.AllowAny]
 
-class AtividadesRealizadasUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = AtividadesRealizadas.objects.all()
-    serializer_class = AtividadesRealizadasSerializer
-
-    permission_classes = [permissions.AllowAny]
-
-class PlanejamentoListCreateView(generics.ListCreateAPIView):
+class PlanejamentoViewSet(viewsets.ModelViewSet):
     queryset = Planejamento.objects.all()
     serializer_class = PlanejamentoSerializer
 
     permission_classes = [permissions.AllowAny]
 
-
-class PlanejamentoUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Planejamento.objects.all()
-    serializer_class = PlanejamentoSerializer
-
-    permission_classes = [permissions.AllowAny]
-
-class SatisfacaoListCreateView(generics.ListCreateAPIView):
+class SatisfacaoViewSet(viewsets.ModelViewSet):
     queryset = Satisfacao.objects.all()
     serializer_class = SatisfacaoSerializer
 
     permission_classes = [permissions.AllowAny]
 
-class SatisfacaoUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Satisfacao.objects.all()
-    serializer_class = SatisfacaoSerializer
-
-    permission_classes = [permissions.AllowAny]
-
-class ComportamentoDigitalListCreateView(generics.ListCreateAPIView):
+class ComportamentoDigitalViewSet(viewsets.ModelViewSet):
     queryset = ComportamentoDigital.objects.all()
     serializer_class = ComportamentoDigitalSerializer
 
     permission_classes = [permissions.AllowAny]
 
-class ComportamentoDigitalUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = ComportamentoDigital.objects.all()
-    serializer_class = ComportamentoDigitalSerializer
-
-    permission_classes = [permissions.AllowAny]
-
+   
