@@ -15,9 +15,9 @@ class ViagemViewSet(viewsets.ModelViewSet):
 
     permission_classes = [permissions.AllowAny]
 
-class PercepcaoViewSet(viewsets.ModelViewSet):
-    queryset = Percepcao.objects.all()
-    serializer_class = PercepcaoSerializer
+class AvaliacaoViewSet(viewsets.ModelViewSet):
+    queryset = Avaliacao.objects.all()
+    serializer_class = AvaliacaoSerializer
 
     permission_classes = [permissions.AllowAny]
 
@@ -30,18 +30,6 @@ class AtividadesRealizadasViewSet(viewsets.ModelViewSet):
 class PlanejamentoViewSet(viewsets.ModelViewSet):
     queryset = Planejamento.objects.all()
     serializer_class = PlanejamentoSerializer
-
-    permission_classes = [permissions.AllowAny]
-
-class SatisfacaoViewSet(viewsets.ModelViewSet):
-    queryset = Satisfacao.objects.all()
-    serializer_class = SatisfacaoSerializer
-
-    permission_classes = [permissions.AllowAny]
-
-class ComportamentoDigitalViewSet(viewsets.ModelViewSet):
-    queryset = ComportamentoDigital.objects.all()
-    serializer_class = ComportamentoDigitalSerializer
 
     permission_classes = [permissions.AllowAny]
 

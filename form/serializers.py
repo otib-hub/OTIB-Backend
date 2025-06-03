@@ -96,10 +96,6 @@ class ViagemSerializer(serializers.ModelSerializer):
         model = Viagem
         fields = '__all__'
 
-class PercepcaoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Percepcao
-        fields = '__all__'
 
 class AtividadesRealizadasSerializer(serializers.ModelSerializer):
     locais_visitados = serializers.SlugRelatedField(
@@ -184,7 +180,7 @@ class PlanejamentoSerializer(serializers.ModelSerializer):
         model = Planejamento
         fields = '__all__'
 
-class SatisfacaoSerializer(serializers.ModelSerializer):
+class AvaliacaoSerializer(serializers.ModelSerializer):
 
     insatisfacao_com_a_visita = serializers.SlugRelatedField(
         many=True,
@@ -199,10 +195,6 @@ class SatisfacaoSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        model = Satisfacao
+        model = Avaliacao
         fields = '__all__'
 
-class ComportamentoDigitalSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ComportamentoDigital
-        fields = '__all__'

@@ -235,34 +235,22 @@ class Planejamento(models.Model):
     )
 
 
-#percepcao
-class Percepcao(models.Model):
 
-    nivel_expectativa = models.IntegerField()
-
-
-#Satisfacao
-
+#avaliacao
 class Insatisfacao(models.Model):
     title = models.CharField(max_length=150)
 
     def __str__(self):
         return self.title
 
-class Satisfacao(models.Model):
 
-    satisfacao_geral_com_a_visita = models.IntegerField()
-    insatisfacao_com_a_visita = models.ManyToManyField(Insatisfacao)
-    intencao_de_retorno = models.IntegerField()
-    recomendacao_do_destino = models.IntegerField()
-
-class ComportamentoDigital(models.Model):
-
-   precisou_de_algum_servico = models.CharField(max_length=255)
-
-   viagens = models.ManyToManyField(Viagem)
-
-
+class Avaliacao(models.Model):
+     satisfacao_geral_com_a_visita = models.IntegerField()
+     insatisfacao_com_a_visita = models.ManyToManyField(Insatisfacao)
+     nivel_expectativa = models.IntegerField()
+     nivel_satisfacao = models.IntegerField()
+     intencao_de_retorno = models.IntegerField()
+     precisou_de_algum_servico = models.CharField(max_length=255)
     #de 1 a 10 -> satisfação
     # do que menos gostou ->  satisfação
     # qual era o nivel da expectativa -> percepção
