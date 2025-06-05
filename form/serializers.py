@@ -198,3 +198,100 @@ class AvaliacaoSerializer(serializers.ModelSerializer):
         model = Avaliacao
         fields = '__all__'
 
+
+class MasterSerializer(serializers.Serializer):
+    # campos de Turista
+    tourist_country = serializers.ChoiceField(choices=Turista.Pais.choices)
+    tourist_state = serializers.ChoiceField(choices=Turista.Estado.choices)
+    tourist_city = serializers.ChoiceField(choices=Turista.Cidade.choices)
+    tourist_age_group = serializers.IntegerField()
+    tourist_gender = serializers.ChoiceField(choices=Turista.Genero.choices)
+    tourist_education = serializers.IntegerField()
+    tourist_estimated_income = serializers.ChoiceField(choices=Turista.RendaEstimada.choices)
+
+    # PLANEJAMENTO
+    planning_was_planned = serializers.BooleanField()
+    planning_time = serializers.IntegerField()
+    planning_information_sources = serializers.ListField(child=serializers.CharField(), allow_empty=True)
+    planning_organization = serializers.CharField()
+
+    # VIAGEM
+    trip_has_reincidence = serializers.BooleanField()
+    trip_reincidence = serializers.IntegerField(allow_null=True, required=False)
+    trip_know_ibiapaba_mirantes = serializers.BooleanField()
+    trip_how_know_ibiapaba_mirantes = serializers.ListField(child=serializers.CharField(), allow_empty=True)
+    trip_reasons = serializers.ListField(child=serializers.CharField(), allow_empty=True)
+    trip_vehicles = serializers.ListField(child=serializers.CharField(), allow_empty=True)
+    trip_stay_time = serializers.IntegerField()
+    trip_average_diary_expense = serializers.IntegerField()
+    trip_hosting_types = serializers.ListField(child=serializers.CharField(), allow_empty=True)
+
+    # ATIVIDADES
+    activities_places_visited = serializers.ListField(child=serializers.CharField(), allow_empty=True)
+    activities_events_visited = serializers.ListField(child=serializers.CharField(), allow_empty=True)
+    activities_used_apps = serializers.ListField(child=serializers.CharField(), allow_empty=True)
+
+    # AVALIAÇÃO
+    evaluation_recommendation_rate = serializers.IntegerField()
+    evaluation_dissatisfactions = serializers.ListField(child=serializers.CharField(), allow_empty=True)
+    evaluation_expectation_rate = serializers.IntegerField()
+    evaluation_satisfaction_rate = serializers.IntegerField()
+    evaluation_return_intent_rate = serializers.IntegerField(allow_null=True, required=False)
+    evaluation_open_opinion = serializers.CharField(allow_blank=True, allow_null=True)
+    
+    def create(self, validated_data):
+        
+        turista_data = {
+            'pais': validated_data.pop('tourist_country'),
+            'estado': validated_data.pop('tourist_state'),
+            'cidade': validated_data.pop('tourist_city'),
+            'faixa_etaria': validated_data.pop('tourist_age_group'),
+            'genero': validated_data.pop('tourist_gender'),
+            'escolaridade': validated_data.pop('tourist_education'),
+            'renda_estimada': validated_data.pop('tourist_estimated_income')
+        }
+        
+        turista = Turista.objects.create(**turista_data)
+
+        planejamento_data = {
+         'viagem_planejada'  : validated_data.pop('planning_was_planned'),
+         'antecedencia_do_planejamento' : validated_data.pop('planning_time'),
+         'fontes_de_informacao_utilizadas' : validated_data.pop('planning_information_sources'),
+         'forma_de_organizacao' : validated_data.pop('planning_organization'),
+        }
+        
+        planejamento = Planejamento.objects.create(**planejamento_data)
+
+        viagem_data = {
+           'ja_visitou': validated_data.pop('trip_has_reincidence'),
+           'reincidencia': validated_data.pop('trip_reincidence'),
+           'conhece_a_rota_mirantes': validated_data.pop('trip_know_ibiapaba_mirantes'),
+           'como_soube_dos_mirantes': validated_data.pop('trip_how_know_ibiapaba_mirantes'),
+           'motivo': validated_data.pop('trip_reasons'),
+           'veiculo_utilizado': validated_data.pop('trip_vehicles'),
+           'tempo_de_estadia' : validated_data.pop('trip_stay_time'),
+           'gasto_diario_estimado': validated_data.pop('trip_average_diary_expense'),
+           'tipo_de_hospedagem': validated_data.pop('trip_hosting_types')
+        }
+        
+        viagem = Viagem.objects.create(**viagem_data)
+        
+        atividades_data = {
+          'locais_visitados' : validated_data.pop('activities_places_visited'),
+          'participacao_em_eventos' : validated_data.pop('activities_events_visited'),
+          'aplicativos' : validated_data.pop('activities_used_apps')
+        }
+        
+        atividades = AtividadesRealizadas.objects.create(**atividades_data)
+        
+        avaliacao_data = {
+           'satisfacao_geral_com_a_visita': validated_data.pop('evaluation_recommendation_rate'),
+           'insatisfacao_com_a_visita': validated_data.pop('evaluation_dissatisfactions'),
+           'nivel_expectativa': validated_data.pop('evaluation_expectation_rate'),
+           'nivel_satisfacao':  validated_data.pop('evaluation_satisfaction_rate'),
+           'intencao_de_retorno': validated_data.pop('evaluation_return_intent_rate') ,
+           'precisou_de_algum_servico': validated_data.pop('valuation_open_opinion') 
+        }
+        
+        avaliacao = Avaliacao.objects.create(**avaliacao_data)
+        

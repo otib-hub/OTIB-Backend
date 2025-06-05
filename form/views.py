@@ -1,5 +1,7 @@
 from django.shortcuts import render
-from rest_framework import generics, permissions, viewsets
+from rest_framework import generics, permissions, viewsets, status
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from .models import *
 from .serializers import * 
 
@@ -33,4 +35,14 @@ class PlanejamentoViewSet(viewsets.ModelViewSet):
 
     permission_classes = [permissions.AllowAny]
 
+
+
+class PesquisaCompletaView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = MasterSerializer(data=request.data)
+        if serializer.is_valid():
+            resultado = serializer.save()
+            return Response(resultado, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
    
+

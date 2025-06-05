@@ -11,5 +11,6 @@ router.register(r'planejamento', PlanejamentoViewSet, basename='planejamento')
 
 
 urlpatterns = [
+ path('pesquisa-completa/', PesquisaCompletaView.as_view(), name='pesquisa-completa'),
  path('', include(router.urls)),
-]
+] 
