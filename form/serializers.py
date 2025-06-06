@@ -200,7 +200,6 @@ class AvaliacaoSerializer(serializers.ModelSerializer):
 
 
 class MasterSerializer(serializers.Serializer):
-    # campos de Turista
     tourist_country = serializers.ChoiceField(choices=Turista.Pais.choices)
     tourist_state = serializers.ChoiceField(choices=Turista.Estado.choices)
     tourist_city = serializers.ChoiceField(choices=Turista.Cidade.choices)
@@ -209,89 +208,175 @@ class MasterSerializer(serializers.Serializer):
     tourist_education = serializers.IntegerField()
     tourist_estimated_income = serializers.ChoiceField(choices=Turista.RendaEstimada.choices)
 
-    # PLANEJAMENTO
     planning_was_planned = serializers.BooleanField()
     planning_time = serializers.IntegerField()
-    planning_information_sources = serializers.ListField(child=serializers.CharField(), allow_empty=True)
-    planning_organization = serializers.CharField()
+    planning_information_sources = serializers.ListField(
+        child=serializers.CharField(), allow_empty=True
+    )
+    planning_organization = serializers.IntegerField()
 
-    # VIAGEM
     trip_has_reincidence = serializers.BooleanField()
     trip_reincidence = serializers.IntegerField(allow_null=True, required=False)
     trip_know_ibiapaba_mirantes = serializers.BooleanField()
-    trip_how_know_ibiapaba_mirantes = serializers.ListField(child=serializers.CharField(), allow_empty=True)
-    trip_reasons = serializers.ListField(child=serializers.CharField(), allow_empty=True)
-    trip_vehicles = serializers.ListField(child=serializers.CharField(), allow_empty=True)
+    trip_how_know_ibiapaba_mirantes = serializers.ListField(
+        child=serializers.CharField(), allow_empty=True
+    ) 
+    trip_reasons = serializers.ListField(child=serializers.CharField(), allow_empty=True)  # IDs ou títulos de Motivo
+    trip_vehicles = serializers.ListField(child=serializers.CharField(), allow_empty=True)  # IDs ou títulos de Veiculo
     trip_stay_time = serializers.IntegerField()
     trip_average_diary_expense = serializers.IntegerField()
-    trip_hosting_types = serializers.ListField(child=serializers.CharField(), allow_empty=True)
+    trip_hosting_types = serializers.ListField(
+        child=serializers.CharField(), allow_empty=True
+    )
 
-    # ATIVIDADES
-    activities_places_visited = serializers.ListField(child=serializers.CharField(), allow_empty=True)
-    activities_events_visited = serializers.ListField(child=serializers.CharField(), allow_empty=True)
-    activities_used_apps = serializers.ListField(child=serializers.CharField(), allow_empty=True)
+    activities_places_visited = serializers.ListField(
+        child=serializers.CharField(), allow_empty=True
+    )
+    activities_events_visited = serializers.ListField(
+        child=serializers.CharField(), allow_empty=True
+    )
+    activities_used_apps = serializers.ListField(
+        child=serializers.CharField(), allow_empty=True
+    )
 
-    # AVALIAÇÃO
     evaluation_recommendation_rate = serializers.IntegerField()
-    evaluation_dissatisfactions = serializers.ListField(child=serializers.CharField(), allow_empty=True)
+    evaluation_dissatisfactions = serializers.ListField(
+        child=serializers.CharField(), allow_empty=True
+    )
     evaluation_expectation_rate = serializers.IntegerField()
     evaluation_satisfaction_rate = serializers.IntegerField()
     evaluation_return_intent_rate = serializers.IntegerField(allow_null=True, required=False)
     evaluation_open_opinion = serializers.CharField(allow_blank=True, allow_null=True)
-    
+
+    def _set_m2m_field(self, instance, field_name, raw_list, related_model, error_key):
+        try:
+            ids = [int(x) for x in raw_list]
+            qs = related_model.objects.filter(id__in=ids)
+            missing = set(ids) - set(qs.values_list('id', flat=True))
+            if missing:
+                raise serializers.ValidationError({error_key: f"IDs inválidos em {related_model.__name__}: {sorted(missing)}"})
+            instance.__getattribute__(field_name).set(qs)
+            return
+        except (ValueError, TypeError):
+            # 2) Caso não sejam IDs válidos, interpreta como títulos
+            qs = related_model.objects.filter(title__in=raw_list)
+            missing_titles = set(raw_list) - set(qs.values_list('title', flat=True))
+            if missing_titles:
+                raise serializers.ValidationError({error_key: f"Títulos inválidos em {related_model.__name__}: {sorted(missing_titles)}"})
+            instance.__getattribute__(field_name).set(qs)
+            return
+
     def create(self, validated_data):
-        
         turista_data = {
-            'pais': validated_data.pop('tourist_country'),
-            'estado': validated_data.pop('tourist_state'),
-            'cidade': validated_data.pop('tourist_city'),
-            'faixa_etaria': validated_data.pop('tourist_age_group'),
-            'genero': validated_data.pop('tourist_gender'),
-            'escolaridade': validated_data.pop('tourist_education'),
-            'renda_estimada': validated_data.pop('tourist_estimated_income')
+            "pais": validated_data.pop("tourist_country"),
+            "estado": validated_data.pop("tourist_state"),
+            "cidade": validated_data.pop("tourist_city"),
+            "faixa_etaria": validated_data.pop("tourist_age_group"),
+            "genero": validated_data.pop("tourist_gender"),
+            "escolaridade": validated_data.pop("tourist_education"),
+            "renda_estimada": validated_data.pop("tourist_estimated_income"),
         }
-        
         turista = Turista.objects.create(**turista_data)
 
-        planejamento_data = {
-         'viagem_planejada'  : validated_data.pop('planning_was_planned'),
-         'antecedencia_do_planejamento' : validated_data.pop('planning_time'),
-         'fontes_de_informacao_utilizadas' : validated_data.pop('planning_information_sources'),
-         'forma_de_organizacao' : validated_data.pop('planning_organization'),
-        }
+        fontes_raw = validated_data.pop("planning_information_sources")
+        planejamento = Planejamento.objects.create(
+            turista=turista,
+            viagem_planejada=validated_data.pop("planning_was_planned"),
+            antecedencia_do_planejamento=validated_data.pop("planning_time"),
+            forma_de_organizacao=validated_data.pop("planning_organization"),
+        )
+        self._set_m2m_field(
+            instance=planejamento,
+            field_name="fontes_de_informacao_utilizadas",
+            raw_list=fontes_raw,
+            related_model=FonteInformacao,
+            error_key="planning_information_sources",
+        )
         
-        planejamento = Planejamento.objects.create(**planejamento_data)
+        motivos_raw = validated_data.pop("trip_reasons")
+        veiculos_raw = validated_data.pop("trip_vehicles")
+        conhecimentos_raw = validated_data.pop("trip_how_know_ibiapaba_mirantes")
+        hospedagens_raw = validated_data.pop("trip_hosting_types")
 
-        viagem_data = {
-           'ja_visitou': validated_data.pop('trip_has_reincidence'),
-           'reincidencia': validated_data.pop('trip_reincidence'),
-           'conhece_a_rota_mirantes': validated_data.pop('trip_know_ibiapaba_mirantes'),
-           'como_soube_dos_mirantes': validated_data.pop('trip_how_know_ibiapaba_mirantes'),
-           'motivo': validated_data.pop('trip_reasons'),
-           'veiculo_utilizado': validated_data.pop('trip_vehicles'),
-           'tempo_de_estadia' : validated_data.pop('trip_stay_time'),
-           'gasto_diario_estimado': validated_data.pop('trip_average_diary_expense'),
-           'tipo_de_hospedagem': validated_data.pop('trip_hosting_types')
-        }
-        
-        viagem = Viagem.objects.create(**viagem_data)
-        
-        atividades_data = {
-          'locais_visitados' : validated_data.pop('activities_places_visited'),
-          'participacao_em_eventos' : validated_data.pop('activities_events_visited'),
-          'aplicativos' : validated_data.pop('activities_used_apps')
-        }
-        
-        atividades = AtividadesRealizadas.objects.create(**atividades_data)
-        
-        avaliacao_data = {
-           'satisfacao_geral_com_a_visita': validated_data.pop('evaluation_recommendation_rate'),
-           'insatisfacao_com_a_visita': validated_data.pop('evaluation_dissatisfactions'),
-           'nivel_expectativa': validated_data.pop('evaluation_expectation_rate'),
-           'nivel_satisfacao':  validated_data.pop('evaluation_satisfaction_rate'),
-           'intencao_de_retorno': validated_data.pop('evaluation_return_intent_rate') ,
-           'precisou_de_algum_servico': validated_data.pop('valuation_open_opinion') 
-        }
-        
-        avaliacao = Avaliacao.objects.create(**avaliacao_data)
-        
+        viagem = Viagem.objects.create(
+            turista=turista,
+            ja_visitou=validated_data.pop("trip_has_reincidence"),
+            reincidencia=validated_data.pop("trip_reincidence"),
+            conhece_a_rota_mirantes=validated_data.pop("trip_know_ibiapaba_mirantes"),
+            tempo_de_estadia=validated_data.pop("trip_stay_time"),
+            gasto_diario_estimado=validated_data.pop("trip_average_diary_expense"),
+        )
+        self._set_m2m_field(
+            instance=viagem,
+            field_name="motivo",
+            raw_list=motivos_raw,
+            related_model=Motivo,
+            error_key="trip_reasons",
+        )
+        self._set_m2m_field(
+            instance=viagem,
+            field_name="veiculo_utilizado",
+            raw_list=veiculos_raw,
+            related_model=Veiculo,
+            error_key="trip_vehicles",
+        )
+        self._set_m2m_field(
+            instance=viagem,
+            field_name="como_soube_dos_mirantes",
+            raw_list=conhecimentos_raw,
+            related_model=ConhecimentoMirantes,
+            error_key="trip_how_know_ibiapaba_mirantes",
+        )
+        self._set_m2m_field(
+            instance=viagem,
+            field_name="tipo_de_hospedagem",
+            raw_list=hospedagens_raw,
+            related_model=TipoHospedagem,
+            error_key="trip_hosting_types",
+        )
+
+        locais_raw = validated_data.pop("activities_places_visited")
+        eventos_raw = validated_data.pop("activities_events_visited")
+        apps_raw = validated_data.pop("activities_used_apps")
+
+        atividades = AtividadesRealizadas.objects.create(turista=turista)
+        self._set_m2m_field(
+            instance=atividades,
+            field_name="locais_visitados",
+            raw_list=locais_raw,
+            related_model=LocaisVisitados,
+            error_key="activities_places_visited",
+        )
+        self._set_m2m_field(
+            instance=atividades,
+            field_name="participacao_em_eventos",
+            raw_list=eventos_raw,
+            related_model=ParticipacaoEmEventos,
+            error_key="activities_events_visited",
+        )
+        self._set_m2m_field(
+            instance=atividades,
+            field_name="aplicativos",
+            raw_list=apps_raw,
+            related_model=AplicativosUtilizados,
+            error_key="activities_used_apps",
+        )
+
+        dissat_raw = validated_data.pop("evaluation_dissatisfactions")
+        avaliacao = Avaliacao.objects.create(
+            turista=turista,
+            satisfacao_geral_com_a_visita=validated_data.pop("evaluation_recommendation_rate"),
+            nivel_expectativa=validated_data.pop("evaluation_expectation_rate"),
+            nivel_satisfacao=validated_data.pop("evaluation_satisfaction_rate"),
+            intencao_de_retorno=validated_data.pop("evaluation_return_intent_rate", None),
+            precisou_de_algum_servico=validated_data.pop("evaluation_open_opinion"),
+        )
+        self._set_m2m_field(
+            instance=avaliacao,
+            field_name="insatisfacao_com_a_visita",
+            raw_list=dissat_raw,
+            related_model=Insatisfacao,
+            error_key="evaluation_dissatisfactions",
+        )
+
+        return turista
