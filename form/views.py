@@ -1,5 +1,7 @@
 from django.shortcuts import render
-from rest_framework import generics, permissions, viewsets
+from rest_framework import generics, permissions, viewsets, status
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from .models import *
 from .serializers import * 
 
@@ -15,9 +17,9 @@ class ViagemViewSet(viewsets.ModelViewSet):
 
     permission_classes = [permissions.AllowAny]
 
-class PercepcaoViewSet(viewsets.ModelViewSet):
-    queryset = Percepcao.objects.all()
-    serializer_class = PercepcaoSerializer
+class AvaliacaoViewSet(viewsets.ModelViewSet):
+    queryset = Avaliacao.objects.all()
+    serializer_class = AvaliacaoSerializer
 
     permission_classes = [permissions.AllowAny]
 
@@ -33,16 +35,15 @@ class PlanejamentoViewSet(viewsets.ModelViewSet):
 
     permission_classes = [permissions.AllowAny]
 
-class SatisfacaoViewSet(viewsets.ModelViewSet):
-    queryset = Satisfacao.objects.all()
-    serializer_class = SatisfacaoSerializer
 
-    permission_classes = [permissions.AllowAny]
 
-class ComportamentoDigitalViewSet(viewsets.ModelViewSet):
-    queryset = ComportamentoDigital.objects.all()
-    serializer_class = ComportamentoDigitalSerializer
-
-    permission_classes = [permissions.AllowAny]
-
+class PesquisaCompletaView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = MasterSerializer(data=request.data)
+        if serializer.is_valid():
+            turista = serializer.save()
+            turista_data = TuristaSerializer(turista).data
+            return Response(turista_data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
    
+

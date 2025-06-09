@@ -5,13 +5,12 @@ from rest_framework.routers import DefaultRouter
 router = DefaultRouter()
 router.register(r'turista', TuristaViewSet, basename='turista')
 router.register(r'viagem', ViagemViewSet, basename='viagem')
-router.register(r'percepcao', PercepcaoViewSet, basename='percepcao')
+router.register(r'avaliacao', AvaliacaoViewSet, basename='avaliacao')
 router.register(r'atividades-realizadas', AtividadesRealizadasViewSet, basename='atividades-realizadas')
 router.register(r'planejamento', PlanejamentoViewSet, basename='planejamento')
-router.register(r'satisfacao', SatisfacaoViewSet, basename='satisfacao')
-router.register(r'comportamento-digital', ComportamentoDigitalViewSet, basename='comportamento-digital')
 
 
 urlpatterns = [
+ path('pesquisa-completa/', PesquisaCompletaView.as_view(), name='pesquisa-completa'),
  path('', include(router.urls)),
-]
+] 
