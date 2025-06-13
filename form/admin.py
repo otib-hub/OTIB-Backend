@@ -87,44 +87,44 @@ class PlanejamentoAdmin(admin.ModelAdmin):
     display_fontes_de_info.short_description = 'Fontes de informação utilizadas' 
     display_fontes_de_info.admin_order_field = 'fontes'  
 
-# @admin.register(FonteInformacao)
-# class FonteInformacao(admin.ModelAdmin):
-#     list_display = [field.name for field in FonteInformacao._meta.fields] 
+@admin.register(FonteInformacao)
+class FonteInformacao(admin.ModelAdmin):
+    list_display = [field.name for field in FonteInformacao._meta.fields] 
 
-# @admin.register(ConhecimentoMirantes)
-# class ConhecimentoMirantes(admin.ModelAdmin):
-#     list_display = [field.name for field in ConhecimentoMirantes._meta.fields] 
-
-
-# @admin.register(Motivo)
-# class Motivo(admin.ModelAdmin):
-#     list_display = [field.name for field in Motivo._meta.fields] 
+@admin.register(ConhecimentoMirantes)
+class ConhecimentoMirantes(admin.ModelAdmin):
+    list_display = [field.name for field in ConhecimentoMirantes._meta.fields] 
 
 
-# @admin.register(Veiculo)
-# class Veiculo(admin.ModelAdmin):
-#     list_display = [field.name for field in Veiculo._meta.fields] 
+@admin.register(Motivo)
+class Motivo(admin.ModelAdmin):
+    list_display = [field.name for field in Motivo._meta.fields] 
 
 
-# @admin.register(TipoHospedagem)
-# class TipoHospedagem(admin.ModelAdmin):
-#     list_display = [field.name for field in TipoHospedagem._meta.fields] 
+@admin.register(Veiculo)
+class Veiculo(admin.ModelAdmin):
+    list_display = [field.name for field in Veiculo._meta.fields] 
 
 
-# @admin.register(LocaisVisitados)
-# class LocaisVisitados(admin.ModelAdmin):
-#     list_display = [field.name for field in LocaisVisitados._meta.fields] 
+@admin.register(TipoHospedagem)
+class TipoHospedagem(admin.ModelAdmin):
+    list_display = [field.name for field in TipoHospedagem._meta.fields] 
 
 
-# @admin.register(ParticipacaoEmEventos)
-# class ParticipacaoEmEventos(admin.ModelAdmin):
-#     list_display = [field.name for field in ParticipacaoEmEventos._meta.fields] 
+@admin.register(LocaisVisitados)
+class LocaisVisitados(admin.ModelAdmin):
+    list_display = [field.name for field in LocaisVisitados._meta.fields] 
 
 
-# @admin.register(AplicativosUtilizados)
-# class AplicativosUtilizados(admin.ModelAdmin):
-#     list_display = [field.name for field in AplicativosUtilizados._meta.fields]
+@admin.register(ParticipacaoEmEventos)
+class ParticipacaoEmEventos(admin.ModelAdmin):
+    list_display = [field.name for field in ParticipacaoEmEventos._meta.fields] 
 
-# @admin.register(Insatisfacao)
-# class Insatisfacao(admin.ModelAdmin):
-#     list_display = [field.name for field in Insatisfacao._meta.fields] 
+
+@admin.register(AplicativosUtilizados)
+class AplicativosUtilizados(admin.ModelAdmin):
+    list_display = [field.name for field in AplicativosUtilizados._meta.fields]
+
+@admin.register(Insatisfacao)
+class Insatisfacao(admin.ModelAdmin):
+    list_display = [field.name for field in Insatisfacao._meta.fields] 

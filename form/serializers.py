@@ -200,18 +200,18 @@ class AvaliacaoSerializer(serializers.ModelSerializer):
 
 
 class MasterSerializer(serializers.Serializer):
-    tourist_country = serializers.ChoiceField(choices=Turista.Pais.choices)
-    tourist_state = serializers.ChoiceField(choices=Turista.Estado.choices)
-    tourist_city = serializers.ChoiceField(choices=Turista.Cidade.choices)
+    tourist_country = serializers.CharField()
+    tourist_state = serializers.CharField()
+    tourist_city = serializers.CharField()
     tourist_age_group = serializers.IntegerField()
     tourist_gender = serializers.ChoiceField(choices=Turista.Genero.choices)
     tourist_education = serializers.IntegerField()
     tourist_estimated_income = serializers.ChoiceField(choices=Turista.RendaEstimada.choices)
 
     planning_was_planned = serializers.BooleanField()
-    planning_time = serializers.IntegerField()
+    planning_time = serializers.IntegerField(allow_null=True,  required=False,)
     planning_information_sources = serializers.ListField(
-        child=serializers.CharField(), allow_empty=True
+        child=serializers.CharField(), allow_empty=True,  required=False
     )
     planning_organization = serializers.IntegerField()
 
@@ -219,7 +219,7 @@ class MasterSerializer(serializers.Serializer):
     trip_reincidence = serializers.IntegerField(allow_null=True, required=False)
     trip_know_ibiapaba_mirantes = serializers.BooleanField()
     trip_how_know_ibiapaba_mirantes = serializers.ListField(
-        child=serializers.CharField(), allow_empty=True
+        child=serializers.CharField(), allow_empty=True,  required=False,
     ) 
     trip_reasons = serializers.ListField(child=serializers.CharField(), allow_empty=True)  # IDs ou títulos de Motivo
     trip_vehicles = serializers.ListField(child=serializers.CharField(), allow_empty=True)  # IDs ou títulos de Veiculo
@@ -229,19 +229,19 @@ class MasterSerializer(serializers.Serializer):
         child=serializers.CharField(), allow_empty=True
     )
 
-    activities_places_visited = serializers.ListField(
+    activities_cities_visited = serializers.ListField(
         child=serializers.CharField(), allow_empty=True
     )
-    activities_events_visited = serializers.ListField(
+    activities_attractions_visited = serializers.ListField(
         child=serializers.CharField(), allow_empty=True
     )
     activities_used_apps = serializers.ListField(
-        child=serializers.CharField(), allow_empty=True
+        child=serializers.CharField(), allow_empty=True,  required=False,
     )
 
     evaluation_recommendation_rate = serializers.IntegerField()
     evaluation_dissatisfactions = serializers.ListField(
-        child=serializers.CharField(), allow_empty=True
+        child=serializers.CharField(), allow_empty=True,  required=False,
     )
     evaluation_expectation_rate = serializers.IntegerField()
     evaluation_satisfaction_rate = serializers.IntegerField()
@@ -278,11 +278,11 @@ class MasterSerializer(serializers.Serializer):
         }
         turista = Turista.objects.create(**turista_data)
 
-        fontes_raw = validated_data.pop("planning_information_sources")
+        fontes_raw = validated_data.pop("planning_information_sources", [])
         planejamento = Planejamento.objects.create(
             turista=turista,
             viagem_planejada=validated_data.pop("planning_was_planned"),
-            antecedencia_do_planejamento=validated_data.pop("planning_time"),
+            antecedencia_do_planejamento=validated_data.pop("planning_time",0),
             forma_de_organizacao=validated_data.pop("planning_organization"),
         )
         self._set_m2m_field(
@@ -295,14 +295,14 @@ class MasterSerializer(serializers.Serializer):
         
         motivos_raw = validated_data.pop("trip_reasons")
         veiculos_raw = validated_data.pop("trip_vehicles")
-        conhecimentos_raw = validated_data.pop("trip_how_know_ibiapaba_mirantes")
+        conhecimentos_raw = validated_data.pop("trip_how_know_ibiapaba_mirantes",[])
         hospedagens_raw = validated_data.pop("trip_hosting_types")
 
         viagem = Viagem.objects.create(
             turista=turista,
             ja_visitou=validated_data.pop("trip_has_reincidence"),
-            reincidencia=validated_data.pop("trip_reincidence"),
-            conhece_a_rota_mirantes=validated_data.pop("trip_know_ibiapaba_mirantes"),
+            reincidencia=validated_data.pop("trip_reincidence",0),
+            conhece_a_rota_mirantes=validated_data.pop("trip_know_ibiapaba_mirantes",),
             tempo_de_estadia=validated_data.pop("trip_stay_time"),
             gasto_diario_estimado=validated_data.pop("trip_average_diary_expense"),
         )
@@ -335,9 +335,9 @@ class MasterSerializer(serializers.Serializer):
             error_key="trip_hosting_types",
         )
 
-        locais_raw = validated_data.pop("activities_places_visited")
-        eventos_raw = validated_data.pop("activities_events_visited")
-        apps_raw = validated_data.pop("activities_used_apps")
+        locais_raw = validated_data.pop("activities_cities_visited")
+        eventos_raw = validated_data.pop("activities_attractions_visited")
+        apps_raw = validated_data.pop("activities_used_apps",[])
 
         atividades = AtividadesRealizadas.objects.create(turista=turista)
         self._set_m2m_field(
@@ -345,14 +345,14 @@ class MasterSerializer(serializers.Serializer):
             field_name="locais_visitados",
             raw_list=locais_raw,
             related_model=LocaisVisitados,
-            error_key="activities_places_visited",
+            error_key="activities_cities_visited",
         )
         self._set_m2m_field(
             instance=atividades,
             field_name="participacao_em_eventos",
             raw_list=eventos_raw,
             related_model=ParticipacaoEmEventos,
-            error_key="activities_events_visited",
+            error_key="activities_attractions_visited",
         )
         self._set_m2m_field(
             instance=atividades,
@@ -362,7 +362,7 @@ class MasterSerializer(serializers.Serializer):
             error_key="activities_used_apps",
         )
 
-        dissat_raw = validated_data.pop("evaluation_dissatisfactions")
+        dissat_raw = validated_data.pop("evaluation_dissatisfactions",[])
         avaliacao = Avaliacao.objects.create(
             turista=turista,
             satisfacao_geral_com_a_visita=validated_data.pop("evaluation_recommendation_rate"),

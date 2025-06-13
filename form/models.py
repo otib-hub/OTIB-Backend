@@ -12,24 +12,8 @@ class Turista(models.Model):
         DE_45_A_54 = 4, '45 a 54 anos'
         DE_55_A_64 = 5, '55 a 64 anos'
         MAIS_DE_65 = 6, '65 anos ou mais'
-
-    class Pais(models.TextChoices):
-        BRASIL    = 'br', 'Brasil'
-        ARGENTINA = 'ar', 'Argentina'
-        ALEMANHA  = 'de', 'Germany'
-        FRANCA    = 'fr', 'France'
-
-    class Estado(models.TextChoices):
-        SP = 'SP', 'São Paulo'
-        RJ = 'RJ', 'Rio de Janeiro'
-        MG = 'MG', 'Minas Gerais'
-        RS = 'RS', 'Rio Grande do Sul'
-	
-    class Cidade(models.TextChoices): 
-        SP ='sao_paulo', 'São Paulo'
-        RJ = 'rio', 'Rio de Janeiro'
-        BELO_HORIZONTE = 'bh', 'Belo Horizonte'
-        PORTO_ALEGRE='poa', 'Porto Alegre'
+#alterar
+  
 
     class Genero(models.TextChoices):
         HOMEM = 'male','Masculino'
@@ -45,6 +29,11 @@ class Turista(models.Model):
         MEDIO_COMPLETO            = 4, 'Ensino médio completo'
         SUPERIOR_INCOMPLETO       = 5, 'Ensino superior incompleto'
         SUPERIOR_COMPLETO         = 6, 'Ensino superior completo'
+        ESPECIALIZACAO            = 7, 'Especialização'
+        MBA                       = 8, 'MBA'
+        MESTRADO                  = 9, 'Mestrado'
+        DOUTORADO                 = 10, 'Doutorado'
+        POS_DOUTORADO             = 11, 'Pós-doutorado'
 
     class RendaEstimada(models.TextChoices):
         LOW        = 'low',      'Menos de R$1.000'
@@ -56,17 +45,11 @@ class Turista(models.Model):
 
     data_resposta = models.DateTimeField(auto_now_add=True)
     
-    pais = models.CharField(max_length=2,
-     choices=Pais.choices,
-     verbose_name='país do turista') 
+    pais = models.CharField(max_length=255)
 
-    estado = models.CharField(max_length=50,
-    choices=Estado.choices,
-    verbose_name='estado')
+    estado = models.CharField(max_length=255)
     
-    cidade = models.CharField(max_length=50,
-    choices=Cidade.choices,
-    verbose_name='cidade')
+    cidade = models.CharField(max_length=255)
 
     faixa_etaria = models.IntegerField(
         choices=FaixaEtaria.choices,
@@ -91,7 +74,8 @@ class Turista(models.Model):
 #Viagem
 
 class ConhecimentoMirantes(models.Model):
-    title = models.CharField(max_length=150)
+    title = models.CharField(max_length=150,        blank=True,
+        null=True)
 
 
     def __str__(self):
@@ -137,9 +121,10 @@ class Viagem(models.Model):
         MAIS_QUINZE = 8, 'Mais de 15 dias'
 
     class Reincidencia(models.IntegerChoices):
-        DUAS_A_CINCO = 1, 'Já visitei entre 2 e 5 vezes'
-        CINCO_A_DEZ = 2, 'Já visitei entre 5 e 10 vezes'
-        MAIS_DE_DEZ = 3, 'Já visitei mais de 10 vezes'
+        NULL = 0, 'Não informado'
+        DUAS_A_CINCO = 1, 'Visitei entre 2 e 5 vezes'
+        CINCO_A_DEZ = 2, 'Visitei entre 5 e 10 vezes'
+        MAIS_DE_DEZ = 3, 'Visitei mais de 10 vezes'
         MENSAL = 4, 'Visito uma vez por mês'
         FIM_DE_SEMANA_FREQ = 5, 'Visito a cada fim de semana'
 
@@ -160,7 +145,8 @@ class Viagem(models.Model):
     motivo = models.ManyToManyField(Motivo)
     veiculo_utilizado = models.ManyToManyField(Veiculo)
     tempo_de_estadia = models.IntegerField(choices=TempoEstadia.choices)
-    reincidencia = models.IntegerField(choices=Reincidencia.choices)
+    reincidencia = models.IntegerField(choices=Reincidencia.choices,        blank=True,
+        null=True)
     como_soube_dos_mirantes = models.ManyToManyField(ConhecimentoMirantes)
     tipo_de_hospedagem = models.ManyToManyField(TipoHospedagem)
     gasto_diario_estimado = models.IntegerField(choices=GastoDiario.choices)
@@ -184,7 +170,8 @@ class ParticipacaoEmEventos(models.Model):
         return self.title
 
 class AplicativosUtilizados(models.Model):
-    title = models.CharField(max_length=150)
+    title = models.CharField(max_length=150,        blank=True,
+        null=True)
 
 
     def __str__(self):
@@ -205,7 +192,8 @@ class AtividadesRealizadas(models.Model):
 
 #planejamento
 class FonteInformacao(models.Model):
-    title = models.CharField(max_length=30)
+    title = models.CharField(max_length=30,        blank=True,
+        null=True)
 
 
     def __str__(self):
@@ -218,6 +206,7 @@ class Planejamento(models.Model):
         related_name='planejamentos'
     )
     class Antecedencia(models.IntegerChoices):
+        NULL = 0, 'Não informado'
         MENOS_DE_1_MES  = 1, 'Menos de 1 mês'
         UM_A_3_MESES    = 2, '1 a 3 meses'
         TRES_A_6_MESES  = 3, '3 a 6 meses'
@@ -237,7 +226,9 @@ class Planejamento(models.Model):
     viagem_planejada = models.BooleanField(default=False)
     antecedencia_do_planejamento = models.IntegerField(
         choices=Antecedencia.choices,
-        verbose_name='antecedência do planejamento'
+        verbose_name='antecedência do planejamento',
+        blank=True,
+        null=True,
     )
     
     fontes_de_informacao_utilizadas = models.ManyToManyField(FonteInformacao)
@@ -251,7 +242,8 @@ class Planejamento(models.Model):
 
 #avaliacao
 class Insatisfacao(models.Model):
-    title = models.CharField(max_length=150)
+    title = models.CharField(max_length=150,        blank=True,
+        null=True)
 
     def __str__(self):
         return self.title
@@ -269,7 +261,8 @@ class Avaliacao(models.Model):
      nivel_expectativa = models.IntegerField()
      nivel_satisfacao = models.IntegerField()
      intencao_de_retorno = models.IntegerField()
-     precisou_de_algum_servico = models.CharField(max_length=255)
+     precisou_de_algum_servico = models.CharField(max_length=500,        blank=True,
+        null=True)
     #de 1 a 10 -> satisfação
     # do que menos gostou ->  satisfação
     # qual era o nivel da expectativa -> percepção
