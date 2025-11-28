@@ -42,11 +42,14 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'rest_framework',
+    'rest_framework_api_key',
     'form'
 ]
 
 REST_FRAMEWORK = {
-
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework_api_key.permissions.HasAPIKey',
+    ]
 }
 
 MIDDLEWARE = [
